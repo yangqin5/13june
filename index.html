@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Happy Birthday To You 💙</title>
+    <!-- นำเข้าฟอนต์น่ารักๆ ภาษาไทย Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Mali:wght@400;700&family=Naree&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome สำหรับไอคอนน่ารักๆ -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* CSS RESET & VARIABLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --blue-dark: #2b5c8f;
+            --blue-medium: #5b92e5;
+            --blue-light: #a5c9f3;
+            --blue-pastel: #e3f0ff;
+            --cream-white: #fcfbfa;
+            --accent-pink: #fbc2eb;
+            --font-lovely: 'Mali', cursive;
+        }
+
+        body {
+            font-family: var(--font-lovely);
+            background: linear-gradient(135deg, #b9d8fc 0%, #e3f0ff 50%, #aed2fb 100%);
+            color: var(--blue-dark);
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* พรีเซ็ตขนาดสำหรับ iPhone 16 (ประมาณ 393px x 852px) */
+        .phone-container {
+            width: 100%;
+            max-width: 402px;
+            /* เผื่อขอบเล็กน้อย */
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 0 0 40px rgba(91, 146, 229, 0.15);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+        }
+
+        /* Canvas สำหรับอนุภาคดอกไม้ รูปภาพหัวใจ และประกายวิบวับ */
+        #bg-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ส่วนหัวคงที่ / สเตตัสขั้นตอน */
+        .header-fixed {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .bday-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--blue-dark);
+            text-shadow: 2px 2px 0px var(--blue-pastel), 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+
+        /* แถบ Progress แสดงขั้นตอนหัวใจ */
+        .step-progress {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .step-heart {
+            font-size: 1.1rem;
+            color: rgba(91, 146, 229, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .step-heart.active {
+            color: #ff8fab;
+            transform: scale(1.3);
+            text-shadow: 0 0 8px rgba(255, 143, 171, 0.6);
+        }
+
+        /* ส่วนของ MUSIC PLAYER */
+        .music-control {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            z-index: 100;
+        }
+
+        .music-btn {
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            color: var(--blue-medium);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .music-btn.playing {
+            animation: spin 4s linear infinite;
+            background: var(--blue-pastel);
+            color: var(--blue-dark);
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* คอนเทนเนอร์แสดงขั้นตอนสไลด์ (Step Slider) */
+        .steps-wrapper {
+            flex-grow: 1;
+            position: relative;
+            z-index: 10;
+            margin-bottom: 60px;
+            /* เว้นที่ว่างให้ปุ่มนำทางด้านล่าง */
+        }
+
+        /* หน้าบล็อกทีละขั้นตอน */
+        .step-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .step-panel.active {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* สไตล์การ์ดหลักแต่ละขั้นตอน */
+        .step-card {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 24px;
+            padding: 24px 20px;
+            border: 2px solid var(--blue-light);
+            box-shadow: 0 10px 25px rgba(165, 201, 243, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .step-title {
+            text-align: center;
+            font-size: 1.3rem;
+            color: var(--blue-dark);
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        .step-desc {
+            text-align: center;
+            font-size: 0.95rem;
+            color: #4a7ab5;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        /* ปุ่มนำทางขั้นตอน (ล่างสุด) */
+        .nav-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #a5c9f3 0%, #5b92e5 100%);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 14px 24px;
+            font-family: var(--font-lovely);
+            font-size: 1.05rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(91, 146, 229, 0.35);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            flex-grow: 1;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .nav-btn.prev-step-btn {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--blue-dark);
+            border: 2px solid var(--blue-light);
+            box-shadow: none;
+            flex-grow: 0.4;
+        }
+
+        .nav-btn:disabled {
+            background: #d5e3f5;
+            color: #92b0d5;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* --- สไตล์เฉพาะบล็อก 1: หน้าต้อนรับ --- */
+        .welcome-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            text-align: center;
+            height: 100%;
+        }
+
+        .welcome-gift {
+            font-size: 6rem;
+            animation: bounceWelcome 2.5s infinite ease-in-out;
+        }
+
+        @keyframes bounceWelcome {
+
+            0%,
+            100% {
+                transform: translateY(0) scale(1) rotate(0);
+            }
+
+            50% {
+                transform: translateY(-15px) scale(1.05) rotate(5deg);
+            }
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #fbc2eb 0%, #ff8fab 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 16px 36px;
+            font-family: var(--font-lovely);
+            font-size: 1.2rem;
+            font-weight: bold;
+            box-shadow: 0 6px 20px rgba(255, 143, 171, 0.4);
+            cursor: pointer;
+            animation: pulseBtn 1.5s infinite;
+        }
+
+        @keyframes pulseBtn {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 6px 20px rgba(255, 143, 171, 0.4);
+            }
+
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 6px 30px rgba(255, 143, 171, 0.6);
+            }
+
+            100% {
+                transform: scale(1);
+                box-shadow: 0 6px 20px rgba(255, 143, 171, 0.4);
+            }
+        }
+
+        /* --- สไตล์เฉพาะบล็อก 2: ของขวัญและเค้ก --- */
+        .gift-box-wrapper {
+            height: 140px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .gift-box {
+            font-size: 5rem;
+            color: #ff8fab;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            animation: shake 1.5s infinite;
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: rotate(0) scale(1);
+            }
+
+            10%,
+            30% {
+                transform: rotate(-8deg) scale(1.05);
+            }
+
+            20%,
+            40% {
+                transform: rotate(8deg) scale(1.05);
+            }
+
+            50% {
+                transform: rotate(0) scale(1);
+            }
+        }
+
+        .cake-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transform: scale(0);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .cake-container.show {
+            display: flex;
+            transform: scale(1);
+        }
+
+        .cake {
+            position: relative;
+            width: 120px;
+            height: 70px;
+            background: #a9d4ff;
+            border-radius: 60px / 30px;
+            margin-top: 15px;
+            box-shadow: 0 10px 0 #7fb8fc, 0 12px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .cake::before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            left: 5px;
+            width: 110px;
+            height: 50px;
+            background: #ffffff;
+            border-radius: 55px / 25px;
+        }
+
+        .cream-drip {
+            position: absolute;
+            top: 25px;
+            left: 10px;
+            width: 100px;
+            height: 12px;
+            background: #ffffff;
+            border-radius: 10px;
+        }
+
+        .candle {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 35px;
+            background: linear-gradient(to top, #ffcc00, #ff66cc);
+            border-radius: 4px;
+        }
+
+        .flame {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 20px;
+            background: radial-gradient(#fff, #ffae19, #ff3c00);
+            border-radius: 50% 50% 20% 20%;
+            box-shadow: 0 0 10px #ffae19;
+            animation: flicker 0.1s infinite alternate;
+            transform-origin: bottom center;
+        }
+
+        .flame.out {
+            display: none;
+        }
+
+        @keyframes flicker {
+            0% {
+                transform: translateX(-50%) rotate(-2deg) scaleY(0.9);
+            }
+
+            100% {
+                transform: translateX(-50%) rotate(2deg) scaleY(1.1);
+            }
+        }
+
+        .blow-tip {
+            font-size: 0.82rem;
+            color: #7b9cc4;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-align: center;
+        }
+
+        /* --- สไตล์เฉพาะบล็อก 3: สไลด์โชว์รูป --- */
+        .gallery-slider {
+            width: 100%;
+            height: 250px;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+            background: #f0f6ff;
+        }
+
+        .slide {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .placeholder-slide {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #e0eeff, #b6d9ff);
+            color: var(--blue-dark);
+            text-align: center;
+            padding: 15px;
+        }
+
+        .placeholder-slide i {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            color: var(--blue-medium);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.15);
+            }
+        }
+
+        .slide-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.85);
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--blue-dark);
+            cursor: pointer;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .prev-btn {
+            left: 8px;
+        }
+
+        .next-btn {
+            right: 8px;
+        }
+
+        .slide-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 5px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--blue-light);
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--blue-dark);
+            transform: scale(1.2);
+            width: 16px;
+            border-radius: 4px;
+        }
+
+        /* --- สไตล์เฉพาะบล็อก 4: จดหมายดึงขึ้น --- */
+        .envelope-container {
+            perspective: 1000px;
+            margin-top: 10px;
+        }
+
+        .envelope {
+            position: relative;
+            width: 100%;
+            height: 130px;
+            background: #d0e5ff;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            overflow: visible;
+            transition: transform 0.3s;
+        }
+
+        .envelope::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 170px solid transparent;
+            border-right: 170px solid transparent;
+            border-top: 75px solid #a4cdff;
+            z-index: 3;
+            transform-origin: top center;
+            transition: transform 0.4s ease;
+        }
+
+        .envelope.open::before {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-body {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #b5d7ff;
+            border-radius: 12px;
+            z-index: 2;
+            clip-path: polygon(0 40%, 50% 100%, 100% 40%, 100% 100%, 0 100%);
+        }
+
+        .envelope-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #eaf3ff;
+            border-radius: 12px;
+            z-index: 0;
+        }
+
+        .letter {
+            position: absolute;
+            bottom: 5px;
+            left: 5%;
+            width: 90%;
+            height: 110px;
+            background: white;
+            border-radius: 8px;
+            z-index: 1;
+            transition: all 0.5s ease;
+            padding: 12px;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+            transform: translateY(0);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .envelope.open .letter {
+            transform: translateY(-85px);
+            height: auto;
+            min-height: 190px;
+            z-index: 4;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border: 2px dashed var(--blue-medium);
+        }
+
+        .letter-content {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--blue-dark);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .envelope.open .letter-content {
+            opacity: 1;
+        }
+
+        .heart-seal {
+            position: absolute;
+            top: 55px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.8rem;
+            color: #ff5e7e;
+            z-index: 4;
+            transition: all 0.3s;
+            animation: beat 1.2s infinite;
+        }
+
+        .envelope.open .heart-seal {
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+        }
+
+        @keyframes beat {
+
+            0%,
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.22);
+            }
+        }
+
+        /* --- สไตล์เฉพาะบล็อก 5: บอร์ดเขียนคำอวยพร --- */
+        .input-wrap {
+            display: flex;
+            gap: 8px;
+        }
+
+        .wish-input {
+            flex-grow: 1;
+            padding: 12px 14px;
+            border: 2px solid var(--blue-light);
+            border-radius: 12px;
+            font-family: var(--font-lovely);
+            font-size: 0.9rem;
+            color: var(--blue-dark);
+            outline: none;
+            background: white;
+        }
+
+        .wish-input:focus {
+            border-color: var(--blue-medium);
+        }
+
+        .wish-list {
+            max-height: 110px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .wish-item {
+            background: var(--blue-pastel);
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .delete-wish {
+            background: none;
+            border: none;
+            color: #ff5e7e;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .final-party-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .celebrate-btn {
+            background: linear-gradient(135deg, #fbc2eb 0%, #ff8fab 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 10px;
+            font-family: var(--font-lovely);
+            font-size: 0.9rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(255, 143, 171, 0.3);
+        }
+
+        /* CUSTOM NOTIFICATION MODAL */
+        .custom-alert {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 320px;
+            background: white;
+            color: var(--blue-dark);
+            padding: 12px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-left: 5px solid var(--blue-medium);
+            transition: top 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .custom-alert.show {
+            top: 25px;
+        }
+
+        .custom-alert i {
+            font-size: 1.4rem;
+            color: #ffda44;
+        }
+
+        /* ท้ายกระดาษ */
+        .footer-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--blue-medium);
+            margin-top: auto;
+            margin-bottom: 5px;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- คอนเทนเนอร์หลักสำหรับพรีวิวสมาร์ทโฟน iPhone 16 -->
+    <div class="phone-container">
+
+        <!-- Canvas สำหรับเอฟเฟกต์แอนิเมชัน -->
+        <canvas id="bg-canvas"></canvas>
+
+        <!-- แผงเล่นดนตรีพรีเมียม -->
+        <div class="music-control">
+            <button class="music-btn" id="music-btn" onclick="toggleMusic()" aria-label="Play Music">
+                <i class="fa-solid fa-music"></i>
+            </button>
+        </div>
+
+        <!-- กล่องแจ้งเตือนเก๋ๆ แทน alert() -->
+        <div id="custom-alert" class="custom-alert">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span id="alert-text">สุขสันต์วันเกิดคนเก่ง! ✨</span>
+        </div>
+
+        <!-- ส่วนของหัวข้อและสเตจความคืบหน้า (Progress Hearts) -->
+        <div class="header-fixed">
+            <h1 class="bday-title">😽</h1>
+            <div class="step-progress" id="step-progress">
+                <!-- หัวใจ 5 ดวงเพื่อบอกขั้นตอนปัจจุบัน -->
+                <i class="fa-solid fa-heart step-heart active" data-step="1"></i>
+                <i class="fa-solid fa-heart step-heart" data-step="2"></i>
+                <i class="fa-solid fa-heart step-heart" data-step="3"></i>
+                <i class="fa-solid fa-heart step-heart" data-step="4"></i>
+                <i class="fa-solid fa-heart step-heart" data-step="5"></i>
+            </div>
+        </div>
+
+        <!-- ห่อหุ้มบล็อกแต่ละขั้นตอน (Steps Slider) -->
+        <div class="steps-wrapper">
+
+            <!-- STEP 1: หน้าต้อนรับ (Welcome Screen) -->
+            <div class="step-panel active" id="panel-1">
+                <div class="welcome-center">
+                    <div class="welcome-gift">🎁🥨</div>
+                    <h2
+                        style="font-size: 1.8rem; color: var(--blue-dark); text-shadow: 0px 4px 10px rgba(255,255,255,0.8);">
+                        วันเกิดฟีฟ่าปีนี้...</h2>
+                    <p style="font-size: 1rem; color: #4a7ab5; padding: 0 20px;">เค้ามีของขวัญเตรียมไว้ให้เธอด้วยนะ
+                        อาจจะเล็กน้อยแต่ว่าเค้าตั้งใจทำมากกกกก</p>
+                    <button class="start-btn" onclick="nextStep()">Go Go Go!! 🤍</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: กล่องของขวัญและเค้กอธิษฐาน -->
+            <div class="step-panel" id="panel-2">
+                <div class="step-card">
+                    <h2 class="step-title">ชิ้นที่ 1: กล่องปริศนา</h2>
+                    <p class="step-desc" id="gift-instruction">กล่องอะไรไม่รู้ขยับได้ด้วย ฟีฟ่าลองเปิดดูไหม</p>
+
+                    <div class="gift-box-wrapper" onclick="openGift()">
+                        <div class="gift-box" id="gift-box">🎁</div>
+
+                        <!-- เค้กจะแสดงเมื่อเปิดกล่องของขวัญ -->
+                        <div class="cake-container" id="cake-container">
+                            <div class="cake">
+                                <div class="cream-drip"></div>
+                                <div class="candle">
+                                    <div class="flame" id="candle-flame"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- แผงเป่าเทียนอธิษฐาน -->
+                    <div id="blow-container" style="display:none; text-align: center;">
+
+                        <button class="celebrate-btn" style="margin: 10px auto 0 auto; padding: 10px 24px;"
+                            onclick="blowCandle()">
+                            🕯️ ดับเทียน
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: สไลด์โชว์รูปภาพประทับใจ -->
+            <div class="step-panel" id="panel-3">
+                <div class="step-card">
+                    <h2 class="step-title">📸 ชิ้นที่ 2: รอยยิ้มของเธอ</h2>
+                    <p class="step-desc">เค้ารวมภาพของฟ่าไว้ตรงนี้ ขอบคุณที่เป็นรอยยิ้มให้เค้าเสมอนะ</p>
+
+                    <div class="gallery-slider" id="gallery-slider">
+                        <!-- รูปภาพ 1 -->
+                        <div class="slide active">
+                            <img src="fifa1.jpg" alt="รูปภาพฟีฟ่า">
+                        </div>
+
+                        <!-- รูปภาพ 2 -->
+                        <div class="slide">
+                            <img src="fifa2.jpg" alt="รูปภาพฟีฟ่า">
+                        </div>
+
+                        <!-- รูปภาพ 3 -->
+                        <div class="slide">
+                            <img src="fifa3.jpg" alt="รูปภาพฟีฟ่า">
+                        </div>
+
+                        <!-- ปุ่มย้อนกลับ/ถัดไป ในสไลด์ -->
+                        <button class="slide-nav prev-btn" onclick="moveSlide(-1)">&lt;</button>
+                        <button class="slide-nav next-btn" onclick="moveSlide(1)">&gt;</button>
+                    </div>
+
+                    <div class="slide-dots" id="slide-dots">
+                        <div class="dot active"></div>
+                        <div class="dot"></div>
+                        <div class="dot"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: ซองจดหมายดึงจดหมาย -->
+            <div class="step-panel" id="panel-4">
+                <div class="step-card">
+                    <h2 class="step-title">💌 ชิ้นที่ 3: ข้อความจากขิม</h2>
+                    <p class="step-desc">เค้ามีข้อความที่อยากบอกเธอ ลองแตะเปิดออกอ่านดูสิ</p>
+
+                    <div class="envelope-container">
+                        <div class="envelope" id="envelope" onclick="toggleLetter()">
+                            <div class="envelope-back"></div>
+                            <div class="letter">
+                                <div class="letter-content" id="letter-text-box">
+                                    <p
+                                        style="font-weight: bold; font-size: 1rem; margin-bottom: 6px; color: var(--blue-dark);">
+                                        ถึง คนที่แสนดีที่สุด... 🎉</p>
+                                    <p style="font-size: 0.8rem; color:#444; line-height: 1.5; text-align: justify;">
+                                        สุขสันต์วันเกิดปีนี้และปีต่อ ๆ ไปนะคะ ขอให้เธอพบเจอแต่ผู้คนที่รัก
+                                        และถนอมหัวใจของเธอ เชื่อมั่นในตัวเองเหมือนที่เค้าเชื่อในตัวเธอ
+                                        สุขภาพกายใจแข็งแรงสมบูรณ์
+                                        มีแต่เสียงหัวเราะที่สดใสตลอดไป... รักฟีฟ่าที่สุดเลยนะ 💙✨
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="envelope-body"></div>
+                            <div class="heart-seal"><i class="fa-solid fa-heart"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: บอร์ดอวยพรเพิ่มเติม + งานปาร์ตี้โปรยภาพหัวใจแสนอบอุ่น -->
+            <div class="step-panel" id="panel-5">
+                <div class="step-card">
+                    <h2 class="step-title">✨ ชิ้นสุดท้าย: เฉลิมฉลอง!</h2>
+                    <p class="step-desc">ส่งท้ายคำอวยพรสุดน่ารัก</p>
+
+                    <!-- ส่วนเขียนการ์ดเพิ่ม -->
+                    <div class="input-wrap">
+                        <input type="text" id="wish-input" class="wish-input"
+                            placeholder="เขียนความปรารถนาของเธอตรงนี้...">
+                        <button class="nav-btn" style="padding: 10px 16px; flex-grow: 0;"
+                            onclick="addWish()">ส่ง</button>
+                    </div>
+
+                    <div class="wish-list" id="wish-list">
+                        <div class="wish-item">
+                            <span>🎂 ไม่ว่าฝนจะตกที่ไหน เค้าเตรียมร่มไว้เผื่อเธอเสมอนะ</span>
+                        </div>
+                        <div class="wish-item">
+                            <span>🌟 เค้าภูมิใจในตัวเธอมาก ๆ นะฟีฟ่า</span>
+                        </div>
+                    </div>
+
+                    <!-- ปุ่มควบคุมแอนิเมชันปาร์ตี้ระเบิดความหรูหรา -->
+                    <div class="final-party-btns">
+                        <button class="celebrate-btn" onclick="showerHeartPhotos()">
+                            <i class="fa-solid fa-heart"></i> โปรยภาพเธอ 💙
+                        </button>
+                        <button class="celebrate-btn"
+                            style="background: linear-gradient(135deg, #a5c9f3 0%, #5b92e5 100%);"
+                            onclick="showerFlowers()">
+                            <i class="fa-solid fa-seedling"></i> โปรยดอกไม้ 🌸
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- แผงนำทางควบคุมล่างสุด (มีผลเมื่อผ่านหน้าแรกแล้ว) -->
+        <div class="nav-controls" id="nav-controls" style="display: none;">
+            <button class="nav-btn prev-step-btn" id="prev-btn" onclick="prevStep()">
+                <i class="fa-solid fa-chevron-left"></i> กลับ
+            </button>
+            <button class="nav-btn next-step-btn" id="next-btn" onclick="nextStep()">
+                <span>ถัดไป</span> <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <!-- แท็กเครดิตน่ารักๆ -->
+        <p class="footer-text">Created with 💙</p>
+
+    </div>
+
+    <!-- ไฟล์เสียงดนตรีคลอ (This Girl's in Love with You ) -->
+    <audio id="bday-song" loop preload="auto">
+        <source src="song.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // --- ระบบสลับขั้นตอนการทำงาน (Step State Machine) ---
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        // รายการ URL รูปภาพของเขาที่จะนำมาโปรยลงมาในกรอบหัวใจ (สามารถเปลี่ยนลิงก์ในนี้ทีหลังได้)
+        const fallingPhotoUrls = [
+            "fifa1.jpg", // รูปถ่ายพอร์ตเทรตน่ารัก 1
+            "fifa2.jpg", // รูปถ่ายพอร์ตเทรตน่ารัก 2
+            "fifa3.jpg"  // รูปถ่ายพอร์ตเทรตน่ารัก 3
+        ];
+
+        // พรีโหลดรูปภาพที่ใช้โปรยเพื่อป้องกันแคนวาสค้างหรือเป็นรูปเปล่าๆ
+        const preloadedFallingImages = [];
+        fallingPhotoUrls.forEach((url, index) => {
+            const img = new Image();
+            img.crossOrigin = "anonymous"; // ป้องกันปัญหา CORS
+            img.src = url;
+            img.onload = () => {
+                preloadedFallingImages.push(img);
+            };
+        });
+
+        // ฟังก์ชันสั่งอัปเดตสถานะของหน้าและการโชว์ควบคุม
+        function updateStepUI() {
+            // อัปเดตแถบหัวใจด้านบน
+            const hearts = document.querySelectorAll('.step-heart');
+            hearts.forEach(heart => {
+                const stepNum = parseInt(heart.getAttribute('data-step'));
+                if (stepNum <= currentStep) {
+                    heart.classList.add('active');
+                } else {
+                    heart.classList.remove('active');
+                }
+            });
+
+            // เปิด-ปิดหน้าแผงขั้นตอน
+            for (let i = 1; i <= totalSteps; i++) {
+                const panel = document.getElementById(`panel-${i}`);
+                if (i === currentStep) {
+                    panel.classList.add('active');
+                } else {
+                    panel.classList.remove('active');
+                }
+            }
+
+            // แสดงหน้าแผงควบคุมล่าง (ซ่อนถ้าอยู่หน้าแรก)
+            const navControls = document.getElementById('nav-controls');
+            if (currentStep === 1) {
+                navControls.style.display = 'none';
+            } else {
+                navControls.style.display = 'flex';
+            }
+
+            // ควบคุมการทำงานของปุ่มกลับ / ถัดไป
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            // หน้า 5 (หน้าสุดท้าย) เปลี่ยนปุ่มถัดไปเป็นปุ่มเสร็จสิ้นหรือฉลองใหญ่
+            if (currentStep === totalSteps) {
+                nextBtn.innerHTML = `<span>ฉลองใหญ่! 👑</span> <i class="fa-solid fa-wand-magic-sparkles"></i>`;
+            } else {
+                nextBtn.innerHTML = `<span>ถัดไป</span> <i class="fa-solid fa-chevron-right"></i>`;
+            }
+
+            // จัดการเงื่อนไขพิเศษล็อคไม่ให้ผ่านขั้นตอนเฉยๆ (เพิ่มความ Interactive)
+            checkStepConditions();
+        }
+
+        // เช็คเงื่อนไขก่อนผ่านขั้น เช่น ต้องแกะกล่องอธิษฐานก่อนถึงจะผ่านไปหน้า 3 ได้
+        let isGiftOpened = false;
+        let isCandleBlown = false;
+        let isLetterOpened = false;
+
+        function checkStepConditions() {
+            const nextBtn = document.getElementById('next-btn');
+
+            if (currentStep === 2) {
+                // ต้องเปิดของขวัญและเป่าเทียนก่อนผ่าน
+                if (!isGiftOpened) {
+                    nextBtn.disabled = true;
+                    document.getElementById('gift-instruction').innerText = " กล่องอะไยไม่รู้ขยับได้ด้วย ฟีฟ่าลองเปิดดูไหม";
+                } else if (!isCandleBlown) {
+                    nextBtn.disabled = true;
+                    document.getElementById('gift-instruction').innerText = " อย่าลืมอธิษฐานให้ตัวเอง ก่อนแตะดับเทียนน้าา";
+                } else {
+                    nextBtn.disabled = false;
+                    document.getElementById('gift-instruction').innerText = " เทียนอธิษฐานดับแล้วอ้วร ไปต่อได้เยย";
+                }
+            } else if (currentStep === 4) {
+                // ต้องเปิดซองจดหมายก่อนอ่าน
+                if (!isLetterOpened) {
+                    nextBtn.disabled = true;
+                } else {
+                    nextBtn.disabled = false;
+                }
+            } else {
+                nextBtn.disabled = false;
+            }
+        }
+
+        function nextStep() {
+            if (currentStep === totalSteps) {
+                // กดหน้าระเบิดรูปภาพหัวใจและดอกไม้พร้อมกันแบบมโหฬารในหน้าสุดท้าย
+                showerHeartPhotos();
+                setTimeout(showerFlowers, 300);
+                setTimeout(showerHeartPhotos, 600);
+                showAlert("🎆 สุขสันต์วันเกิด! ขอให้ฟีฟ่ามีความสุขที่สุดเลยนะ!");
+                return;
+            }
+            currentStep++;
+            updateStepUI();
+
+            // จุดประกายประกายเล็กน้อยเปลี่ยนสเตจ
+            triggerMiniFireworks();
+        }
+
+        function prevStep() {
+            if (currentStep === 1) return;
+            currentStep--;
+            updateStepUI();
+        }
+
+
+        // --- 1. การจัดการ CANVAS: ดอกไม้โปรยปราย, รูปภาพหัวใจ & เอฟเฟกต์พลุ ---
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            const container = document.querySelector('.phone-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('load', resizeCanvas);
+        window.addEventListener('resize', resizeCanvas);
+
+        class Particle {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'flower', 'sparkle', 'firework', 'photo-heart'
+
+                if (type === 'flower') {
+                    this.size = Math.random() * 8 + 6;
+                    this.speedY = Math.random() * 1.2 + 0.6;
+                    this.speedX = Math.random() * 0.8 - 0.4;
+                    this.angle = Math.random() * 360;
+                    this.rotationSpeed = Math.random() * 1.2 - 0.6;
+                    const colors = ['#a5c9f3', '#7fb8fc', '#e3f0ff', '#fbc2eb', '#ffffff'];
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                } else if (type === 'photo-heart') {
+                    // ปรับขนาดให้ออกมาไล่เลี่ยกันกับดอกไม้และเห็นรายละเอียดภาพได้พอดี (ประมาณ 18px - 30px)
+                    this.size = Math.random() * 10 + 18;
+                    this.speedY = Math.random() * 1.5 + 0.8;
+                    this.speedX = Math.random() * 1.0 - 0.5;
+                    this.angle = Math.random() * 360;
+                    this.rotationSpeed = Math.random() * 1.8 - 0.9;
+
+                    // สุ่มรูปภาพของเขาที่พรีโหลดมาแล้ว
+                    if (preloadedFallingImages.length > 0) {
+                        this.image = preloadedFallingImages[Math.floor(Math.random() * preloadedFallingImages.length)];
+                    } else {
+                        this.image = null;
+                    }
+                } else if (type === 'sparkle') {
+                    this.size = Math.random() * 2.5 + 1;
+                    this.speedY = Math.random() * 0.4 + 0.1;
+                    this.speedX = Math.random() * 0.4 - 0.2;
+                    this.color = '#fffbcf';
+                    this.alpha = 1;
+                    this.fadeSpeed = Math.random() * 0.01 + 0.005;
+                } else if (type === 'firework') {
+                    this.size = Math.random() * 2.8 + 1.2;
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 3.5 + 1;
+                    this.speedX = Math.cos(angle) * speed;
+                    this.speedY = Math.sin(angle) * speed;
+                    const colors = ['#ff8fab', '#ffcf66', '#a5c9f3', '#a3ffb4', '#efbcff', '#ffffff'];
+                    this.color = colors[Math.floor(Math.random() * colors.length)];
+                    this.alpha = 1;
+                    this.fadeSpeed = Math.random() * 0.02 + 0.01;
+                }
+            }
+
+            update() {
+                if (this.type === 'flower' || this.type === 'photo-heart') {
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    this.angle += this.rotationSpeed;
+
+                    // เมื่อร่วงหลุดหน้าจอให้เอากลับไปวนรอบใหม่ข้างบนเพื่อความต่อเนื่อง
+                    if (this.y > canvas.height + 20) {
+                        this.y = -20;
+                        this.x = Math.random() * canvas.width;
+                    }
+                } else if (this.type === 'sparkle') {
+                    this.y += this.speedY;
+                    this.x += this.speedX;
+                    this.alpha -= this.fadeSpeed;
+                } else if (this.type === 'firework') {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.speedY += 0.04;
+                    this.alpha -= this.fadeSpeed;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                if (this.type === 'flower') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle * Math.PI / 180);
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        ctx.rotate(Math.PI * 2 / 5);
+                        ctx.ellipse(0, -this.size / 2, this.size / 3, this.size / 2, 0, 0, Math.PI * 2);
+                    }
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size / 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#ffeb99';
+                    ctx.fill();
+
+                } else if (this.type === 'photo-heart') {
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.angle * Math.PI / 180);
+
+                    // 1. วาดรูปทรงหัวใจ (Heart Path)
+                    ctx.beginPath();
+                    ctx.moveTo(0, -this.size / 3);
+                    // ปีกหัวใจด้านซ้าย
+                    ctx.bezierCurveTo(-this.size, -this.size, -this.size, this.size / 3, 0, this.size);
+                    // ปีกหัวใจด้านขวา
+                    ctx.bezierCurveTo(this.size, this.size / 3, this.size, -this.size, 0, -this.size / 3);
+                    ctx.closePath();
+
+                    ctx.save();
+                    // 2. ใช้คำสั่ง Clip ตัดส่วนของรูปภาพให้พอดีกับกรอบรูปหัวใจ
+                    ctx.clip();
+
+                    if (this.image && this.image.complete) {
+                        // ปรับขนาดรูปให้ฟิตพอดีหัวใจ
+                        ctx.drawImage(this.image, -this.size, -this.size, this.size * 2, this.size * 2);
+                    } else {
+                        // รูปพรีโหลดชั่วคราวหรือมีปัญหา ให้ขึ้นสีชมพูพาสเทลทดแทน
+                        ctx.fillStyle = '#ff8fab';
+                        ctx.fill();
+                    }
+                    ctx.restore(); // ยกเลิกสถานะ clip เพื่อวาดเส้นขอบ
+
+                    // 3. วาดเส้นขอบกรอบรูปหัวใจสีขาวสุดหรูหราคู่กัน
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+
+                } else if (this.type === 'sparkle') {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (this.type === 'firework') {
+                    ctx.globalAlpha = this.alpha;
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+        }
+
+        const particles = [];
+
+        function initParticles() {
+            // ดอกไม้ร่วง
+            for (let i = 0; i < 15; i++) {
+                particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height, 'flower'));
+            }
+            // ละอองประกายระยิบระยับ
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(Math.random() * canvas.width, Math.random() * canvas.height, 'sparkle'));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (Math.random() < 0.1) {
+                particles.push(new Particle(Math.random() * canvas.width, 0, 'sparkle'));
+            }
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.update();
+                p.draw();
+
+                // ลบค่าพลุที่จางออกไปแล้วเพื่อไม่ให้เครื่องช้า
+                if ((p.type === 'sparkle' || p.type === 'firework') && p.alpha <= 0) {
+                    particles.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('load', () => {
+            initParticles();
+            animate();
+            setupMicBlow();
+        });
+
+        // จุดพลุใหญ่เฉลิมฉลอง
+        function triggerFireworks() {
+            const centerX = canvas.width / 2 + (Math.random() * 120 - 60);
+            const centerY = canvas.height / 3 + (Math.random() * 120 - 60);
+            for (let i = 0; i < 50; i++) {
+                particles.push(new Particle(centerX, centerY, 'firework'));
+            }
+        }
+
+        // เอฟเฟกต์จุดพลุขนาดเล็กตอนเปลี่ยนหน้า
+        function triggerMiniFireworks() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(centerX, centerY, 'firework'));
+            }
+        }
+
+        // ฟังชันก์แอนิเมชันสำหรับโปรยภาพกรอบรูปหัวใจของคนสำคัญ
+        function showerHeartPhotos() {
+            showAlert("💖 โปรยรูปภาพคนพิเศษ!");
+            for (let i = 0; i < 18; i++) {
+                // สุ่มปล่อยรูปจากด้านบนขอบสกรีนเพื่อให้ค่อยๆ ตกลงมา
+                particles.push(new Particle(Math.random() * canvas.width, -30, 'photo-heart'));
+            }
+        }
+
+        // พายุดอกไม้โปรยปราย
+        function showerFlowers() {
+            showAlert("🌸 โปรยพายุดอกไม้");
+            for (let i = 0; i < 20; i++) {
+                particles.push(new Particle(Math.random() * canvas.width, -15, 'flower'));
+            }
+        }
+
+
+        // --- 2. การควบคุมดนตรีเล่นคลอ ---
+        const bdaySong = document.getElementById('bday-song');
+        const musicBtn = document.getElementById('music-btn');
+
+        function toggleMusic() {
+            if (bdaySong.paused) {
+                bdaySong.play().then(() => {
+                    musicBtn.classList.add('playing');
+                    showAlert(" QwQ เพลงเริ่มเล่นแล้วคับ");
+                }).catch(err => {
+                    showAlert("❌ กรุณากดปุ่มเปิดเสียงอีกครั้งบนเบราว์เซอร์");
+                });
+            } else {
+                bdaySong.pause();
+                musicBtn.classList.remove('playing');
+                showAlert("🔇 ปิดเพลงคลอแล้วนะคะ");
+            }
+        }
+
+
+        // --- 3. การแสดงผลแจ้งเตือนแบบน่ารัก (Custom Alert) ---
+        function showAlert(message) {
+            const alertBox = document.getElementById('custom-alert');
+            const alertText = document.getElementById('alert-text');
+            alertText.innerText = message;
+            alertBox.classList.add('show');
+            setTimeout(() => {
+                alertBox.classList.remove('show');
+            }, 3000);
+        }
+
+
+        // --- 4. ฟังก์ชันเปิดของขวัญและดับเทียนเค้ก ---
+        function openGift() {
+            if (isGiftOpened) return;
+
+            isGiftOpened = true;
+            const giftBox = document.getElementById('gift-box');
+            const cakeContainer = document.getElementById('cake-container');
+            const blowContainer = document.getElementById('blow-container');
+
+            giftBox.style.transform = "scale(0) rotate(360deg)";
+            setTimeout(() => {
+                giftBox.style.display = "none";
+                cakeContainer.classList.add('show');
+                blowContainer.style.display = "block";
+
+                triggerFireworks();
+                checkStepConditions(); // อัปเดตเพื่อเช็คปุ่ม Next
+            }, 400);
+        }
+
+        function blowCandle() {
+            const flame = document.getElementById('candle-flame');
+            if (flame.classList.contains('out')) {
+                flame.classList.remove('out');
+                isCandleBlown = false;
+                showAlert("🔥 เทียนอธิษฐานถูกจุดขึ้นใหม่อีกครั้ง");
+            } else {
+                flame.classList.add('out');
+                isCandleBlown = true;
+                showAlert("🕯️ เทียนดับแน้วว ขอให้ทุกคำปรารถนาส่งตรงถึงฟ้านะคะ ✨");
+                triggerFireworks();
+                setTimeout(triggerFireworks, 400);
+            }
+            checkStepConditions(); // ปลดล็อคปุ่มถัดไป
+        }
+
+
+        // --- 5. ระบบไมโครโฟนสำหรับการตรวจวัดลมเป่า ---
+        // function setupMicBlow() {
+        //     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        //         navigator.mediaDevices.getUserMedia({ audio: true })
+        //             .then(stream => {
+        //                 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        //                 const analyser = audioContext.createAnalyser();
+        //                 const microphone = audioContext.createMediaStreamSource(stream);
+        //                 const javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+        //                 analyser.smoothingTimeConstant = 0.8;
+        //                 analyser.fftSize = 1024;
+
+        //                 microphone.connect(analyser);
+        //                 analyser.connect(javascriptNode);
+        //                 javascriptNode.connect(audioContext.destination);
+
+        //                 javascriptNode.onaudioprocess = function () {
+        //                     const array = new Uint8Array(analyser.frequencyBinCount);
+        //                     analyser.getByteFrequencyData(array);
+        //                     let values = 0;
+        //                     const length = array.length;
+        //                     for (let i = 0; i < length; i++) {
+        //                         values += array[i];
+        //                     }
+        //                     const average = values / length;
+
+        //                     // เสียงเป่าลมไมโครโฟนแรงพอระดับนึง
+        //                     if (average > 45) {
+        //                         const flame = document.getElementById('candle-flame');
+        //                         const cakeContainer = document.getElementById('cake-container');
+        //                         if (currentStep === 2 && cakeContainer.classList.contains('show') && !flame.classList.contains('out')) {
+        //                             blowCandle();
+        //                         }
+        //                     }
+        //                 };
+        //             })
+        //             .catch(err => {
+        //                 console.log("เข้าสู่ไมโครโฟนไม่ได้: " + err);
+        //             });
+        //     }
+        // }
+
+
+        // --- 6. แกลเลอรีรูปภาพสไลด์โชว์ ---
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.dot');
+
+        function showSlide(index) {
+            if (index >= slides.length) currentSlide = 0;
+            else if (index < 0) currentSlide = slides.length - 1;
+            else currentSlide = index;
+
+            slides.forEach((slide, idx) => {
+                if (idx === currentSlide) {
+                    slide.classList.add('active');
+                    dots[idx].classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                    dots[idx].classList.remove('active');
+                }
+            });
+        }
+
+        function moveSlide(step) {
+            showSlide(currentSlide + step);
+        }
+
+        // จัดการ Swipe หน้าจอกลิ้งเลื่อนสำหรับ iPhone 16
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const sliderContainer = document.getElementById('gallery-slider');
+
+        sliderContainer.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        sliderContainer.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            if (touchStartX - touchEndX > 50) moveSlide(1); // ซ้ายไปขวา
+            if (touchEndX - touchStartX > 50) moveSlide(-1); // ขวาไปซ้าย
+        }, false);
+
+
+        // --- 7. การเปิดการ์ดเขียนจดหมายดึงออกมา ---
+        function toggleLetter() {
+            const envelope = document.getElementById('envelope');
+            envelope.classList.toggle('open');
+            isLetterOpened = envelope.classList.contains('open');
+            if (isLetterOpened) {
+                showAlert("💌 เปิดอ่านจดหมายเรียบร้อยแล้วจ้า!");
+                triggerFireworks();
+            }
+            checkStepConditions(); // ปลดล็อคปุ่มถัดไปเมื่อเปิดอ่านจดหมายแล้ว
+        }
+
+
+        // --- 8. บอร์ดส่งคำอวยพรร่วมแชร์ ---
+        function addWish() {
+            const wishInput = document.getElementById('wish-input');
+            const wishText = wishInput.value.trim();
+            if (wishText === "") {
+                showAlert("⚠️ พิมพ์การ์ดอวยพรก่อนแล้วค่อยกดส่งนะคะ");
+                return;
+            }
+
+            const wishList = document.getElementById('wish-list');
+            const newItem = document.createElement('div');
+            newItem.className = 'wish-item';
+            const emojis = ['🎈', '✨', '🌸', '💙', '🍭', '🌈'];
+            const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+
+            newItem.innerHTML = `
+                <span>${randomEmoji} ${wishText}</span>
+                <button class="delete-wish" onclick="deleteWish(this)"><i class="fa-solid fa-trash-can"></i></button>
+            `;
+            wishList.insertBefore(newItem, wishList.firstChild);
+            wishInput.value = "";
+            showAlert("💖 ส่งคำอวยพรสู่บอร์ดเรียบร้อยแล้วค่ะ!");
+            triggerFireworks();
+        }
+
+        function deleteWish(btn) {
+            const item = btn.parentElement;
+            item.style.animation = "slideIn 0.3s ease reverse";
+            setTimeout(() => { item.remove(); }, 300);
+        }
+    </script>
+</body>
+
+</html>
