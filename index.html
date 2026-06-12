@@ -207,11 +207,9 @@
         /* ปุ่มนำทางขั้นตอน (ล่างสุด) */
         .nav-controls {
             position: fixed;
-            bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: calc(100% - 32px);
-            max-width: 370px;
+            bottom: 100px;
+            left: 16px;
+            right: 16px;
             display: flex;
             justify-content: space-between;
             gap: 12px;
@@ -898,7 +896,7 @@
 
                     <!-- แผงเป่าเทียนอธิษฐาน -->
                     <div id="blow-container" style="display:none; text-align: center;">
-                        
+
                         <button class="celebrate-btn" style="margin: 10px auto 0 auto; padding: 10px 24px;"
                             onclick="blowCandle()">
                             🕯️ ดับเทียน
@@ -916,43 +914,25 @@
                     <div class="gallery-slider" id="gallery-slider">
                         <!-- รูปภาพ 1 -->
                         <div class="slide active">
-                            <div class="placeholder-slide">
-                                <img src="fifa1.jpg" alt="[รูปภาพน่ารักของฟีฟ่า]"
-                                    style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;">
-                            </div>
+                            <img src="fifa1.jpg" alt="รูปภาพฟีฟ่า">
                         </div>
 
                         <!-- รูปภาพ 2 -->
                         <div class="slide">
-                            <div class="placeholder-slide">
-                                <img src="fifa2.jpg" alt="[รูปภาพความทรงจำแสนหวาน]"
-                                    style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;">
-                            </div>
+                            <img src="fifa2.jpg" alt="รูปภาพฟีฟ่า">
                         </div>
 
                         <!-- รูปภาพ 3 -->
                         <div class="slide">
-                            <div class="placeholder-slide">
-                                <img src="fifa3.jpg"
-                                    alt="[รูปดอกไม้สีฟ้าอ่อน]"
-                                    style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;">
-                            </div>
+                            <img src="fifa3.jpg" alt="รูปภาพฟีฟ่า">
                         </div>
 
                         <div class="slide">
-                            <div class="placeholder-slide">
-                                <img src="fifa4.jpg"
-                                    alt="[รูปดอกไม้สีฟ้าอ่อน]"
-                                    style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;">
-                            </div>
+                            <img src="fifa4.jpg" alt="รูปภาพฟีฟ่า">
                         </div>
 
                         <div class="slide">
-                            <div class="placeholder-slide">
-                                <img src="fifa5.jpg"
-                                    alt="[รูปดอกไม้สีฟ้าอ่อน]"
-                                    style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; z-index:-1;">
-                            </div>
+                            <img src="fifa5.jpg" alt="รูปภาพฟีฟ่า">
                         </div>
 
                         <!-- ปุ่มย้อนกลับ/ถัดไป ในสไลด์ -->
@@ -985,7 +965,9 @@
                                         style="font-weight: bold; font-size: 1rem; margin-bottom: 6px; color: var(--blue-dark);">
                                         ถึง คนที่แสนดีที่สุด... 🎉</p>
                                     <p style="font-size: 0.8rem; color:#444; line-height: 1.5; text-align: justify;">
-                                        สุขสันต์วันเกิดปีนี้และปีต่อ ๆ ไปนะคะ ขอให้เธอพบเจอแต่ผู้คนที่รัก และถนอมหัวใจของเธอ เชื่อมั่นในตัวเองเหมือนที่เค้าเชื่อในตัวเธอ สุขภาพกายใจแข็งแรงสมบูรณ์
+                                        สุขสันต์วันเกิดปีนี้และปีต่อ ๆ ไปนะคะ ขอให้เธอพบเจอแต่ผู้คนที่รัก
+                                        และถนอมหัวใจของเธอ เชื่อมั่นในตัวเองเหมือนที่เค้าเชื่อในตัวเธอ
+                                        สุขภาพกายใจแข็งแรงสมบูรณ์
                                         มีแต่เสียงหัวเราะที่สดใสตลอดไป... รักฟีฟ่าที่สุดเลยนะ 💙✨
                                     </p>
                                 </div>
@@ -1023,12 +1005,12 @@
                     <!-- ปุ่มควบคุมแอนิเมชันปาร์ตี้ระเบิดความหรูหรา -->
                     <div class="final-party-btns">
                         <button class="celebrate-btn" onclick="showerHeartPhotos()">
-                            <i class="fa-solid fa-heart"></i> โปรยภาพเธอ 💙
+                            <i class="fa-solid fa-heart"></i> โปรยภาพเธอ 
                         </button>
                         <button class="celebrate-btn"
                             style="background: linear-gradient(135deg, #a5c9f3 0%, #5b92e5 100%);"
                             onclick="showerFlowers()">
-                            <i class="fa-solid fa-seedling"></i> โปรยดอกไม้ 🌸
+                            <i class="fa-solid fa-seedling"></i> โปรยดอกไม้ 
                         </button>
                     </div>
                 </div>
